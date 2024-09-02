@@ -5,10 +5,12 @@ In this Project, We create webserver and database server in aws and make them hi
 
 Step 1:
 Create Vitual Private Cloud 
+
 Go to aws vpc -> click create vpc -> select vpc only-> 10.0.0.0/16 as ipv4->create vpc
 
 Step 2:
 Setting up subnets in vpc:
+
 Go to aws vpc -> click subnets -> create subnet->select your vpc->create 2 subnetes-> publuc subnet 10.0.0.0/24 and private subnet 10.0.1.0/24
 
 Step 3:
@@ -121,4 +123,52 @@ Step 10:
 Access appication in custom domain name
 
 If you want access your application in custom domain name, you can register domain in route53.
+
+**To deploy 2 tier architecture as high available architecture.**
+If any disaster happens in webserver or database server in 2 tier application then whole application losses. so we need to make sure it is a high availaable architecture.
+
+Step 11 : 
+To make webserver(ec2 instance) high available
+
+To make our ec2 instance highely available, auto scaling comes into picture. for that, we need to create ami for ec2, launch template of ec2, auto scaling groups. Then we need to create load balancer to perform auto scaling.
+
+To create another public subnet,
+Go to aws vpc -> click subnet-> create public subnet(10.0.3.0/24, ap-south-1b)
+Go to public route table -> click edit subnet association -> add above public subnet also
+
+To take ami backup of ec2 instance(no need to create another ec2 instance by same coonfiguration)
+go to aws ec2->click your ec2 instance->click actions->click create image
+
+To create launch template for ec2 insatnce(to automate ec2 insatnce creation wile auto scaling)
+go to aws ec2->click create launch template->select above ami->t2.micro as instance type->select key pair->user data (#!/bin/bash yum update -y  sudo service httpd restart)
+
+To create autoscaling group for launch instances while auto scaling,
+Go to aws ec2->click create autoscaling groups -> select launch template->select both public subnetes->select no load balancer(because we create seperately and configure)->select desired capacity 2,min capacity 1, max capacity 3->selct no scaling policies
+
+**Note:** 
+1.we can also enable SNS notification while creating autoscaling group. If we enabled means it will notify us when instance failed to launch, failed to terminate, successfully launched, successfully terminated. For now we disable this option
+2.There is no public ip address allocate for instance which are created due to autoscaling. so please go to both public subnet settings and enable auto assign public adress option.
+
+To create application load balancer to control traffic,
+we need target group.
+Go to aws ec2-> click cretae target group->select target type as insatnce ->http port 80->select vpc->type /index.php inside health check box->click advanced health check settings(you can decide how many times you want to check ec2 healthy,unhealthy,interval of checking)
+
+Go to aws ec2->click create application load balancer->select internet facing as scheme->select vpc->select both public subnets->create security group with http 0.0.0.0/0
+
+
+Step 12: 
+To make Database server highely available
+
+for that you need to convert database to multi az and create read replica for database.
+go to aws rds->select databae->click actions->select convert to multi az->apply immediately
+
+to create read replica, we need to enable automated backup in database.
+Go to aws rds->select database->enable automated backup
+Go to aws rds->select database->click actions->click create read replica
+
+Step 13: 
+To access our custom domain, update load balancer dns name in route53
+
+Go to route53->select your custom domain->edit record A->Give record type as AAAA- Routes the traffic to IPV6->enable alias->Route traffic to application classic load balancer->select region->save
+
 
