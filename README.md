@@ -4,17 +4,17 @@ In this Project, We create webserver and database server in aws and make them hi
 
 
 Step 1:
-Create Vitual Private Cloud 
+**Create Vitual Private Cloud** 
 
 Go to aws vpc -> click create vpc -> select vpc only-> 10.0.0.0/16 as ipv4->create vpc
-
+ 
 Step 2:
-Setting up subnets in vpc:
+**Setting up subnets in vpc:**
 
 Go to aws vpc -> click subnets -> create subnet->select your vpc->create 2 subnetes-> publuc subnet 10.0.0.0/24 and private subnet 10.0.1.0/24
 
 Step 3:
-Configuring internet access
+**Configuring internet access**
 
 To give internet for public, We need to create internet gateway
 Go to aws vpc ->click IG->Create internet gateway
@@ -33,18 +33,18 @@ Now we need to attach private subnet to private routetable. But bydefault privat
 Go to private routetable->click subnet associations->click edit and attach private subnet.
 
 Step 4: 
-Adding Security
+**Adding Security**
 
 for that we need to create security group
 Go to security groups ->click create -> Select inbount rules as http and ssh
 
 Step 5:
-Launch ec2 instance on your public subnet
+**Launch ec2 instance on your public subnet**
 
 Go to aws ec2->launch ec2 instance -> select ami as amazon linux2->t2.micro as instance type->create newkeypair->slect vpc->select punlic subnet->select security group you created->click launch
 
 Step 6:
-Installing wordpress application on ec2 instance
+**Installing wordpress application on ec2 instance**
 
 Go to aws ec2->click your ec2 instance->connect ec2 using ec2 connect method.
 
@@ -67,7 +67,7 @@ sudo chown -R apache:apache /var/www/html/wordpress -> to set permission for apa
 sudo chmod -R 755 /var/www/html/wordpress  -> to set permission for file
 
 Step 7:
-Creating database for wordpress application server
+**Creating database for wordpress application server**
 
 To create database server, we need subnet group.
 Go to aws rds -> click create subnet group->select your vpc->select private subnet and region(because for database, we need to host inside private subnet)
@@ -78,7 +78,7 @@ So create another private subnet similar to which we create in step3 and add thi
 go to aws rds->click create database->select mysql->select template as freetier -> select vpc and 2 both private subnets->create new security group(type:mysql/aurora, protocol type:tcp,port:3306,source:webserver security group)-> create database
 
 Step 8:
-configure datatbase on ec2 instance
+**configure datatbase on ec2 instance**
 
 Go to aws ec2->connect ec2 instance by ec2 connect method
 execute below commands
@@ -115,12 +115,12 @@ sudo systemctl restart php -fpm
 
 
 Step 9:
-Access our application server in webbrowser
+**Access our application server in webbrowser**
 
 Go to browser and type -> http://<public ip of ec2 instance>/wp-admin
 
 Step 10:
-Access appication in custom domain name
+**Access appication in custom domain name**
 
 If you want access your application in custom domain name, you can register domain in route53.
 
@@ -128,7 +128,7 @@ If you want access your application in custom domain name, you can register doma
 If any disaster happens in webserver or database server in 2 tier application then whole application losses. so we need to make sure it is a high availaable architecture.
 
 Step 11 : 
-To make webserver(ec2 instance) high available
+**To make webserver(ec2 instance) high available**
 
 To make our ec2 instance highely available, auto scaling comes into picture. for that, we need to create ami for ec2, launch template of ec2, auto scaling groups. Then we need to create load balancer to perform auto scaling.
 
@@ -157,7 +157,7 @@ Go to aws ec2->click create application load balancer->select internet facing as
 
 
 Step 12: 
-To make Database server highely available
+**To make Database server highely available**
 
 for that you need to convert database to multi az and create read replica for database.
 go to aws rds->select databae->click actions->select convert to multi az->apply immediately
@@ -167,7 +167,7 @@ Go to aws rds->select database->enable automated backup
 Go to aws rds->select database->click actions->click create read replica
 
 Step 13: 
-To access our custom domain, update load balancer dns name in route53
+**To access our custom domain, update load balancer dns name in route53**
 
 Go to route53->select your custom domain->edit record A->Give record type as AAAA- Routes the traffic to IPV6->enable alias->Route traffic to application classic load balancer->select region->save
 
